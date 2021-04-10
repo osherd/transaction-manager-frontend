@@ -1,11 +1,3 @@
 .App {
-  text-align: center;
-  background-color: gainsboro;
-  margin: 5%;
-  border: 2rem;
-}
-.paying-container {
-  display: flex;
-  flex-direction: row;
-  background-color: DodgerBlue;
+  margin-top: 5%;
 }
