@@ -1,27 +1,51 @@
+import { useEffect, useState } from "react";
 import { Box, Button, Grid } from "@material-ui/core";
-import { useState } from "react";
 import AddTransactionDialog from "./AddTransactionDialog";
 import TransactionsList from "./TransactionsList";
 
-const TRANSACTIONS = [
-  { id: 1, tradingParty: "me", counterparty: "you", amount: -400 },
-  { id: 2, tradingParty: "me", counterparty: "you", amount: 500 },
-  { id: 3, tradingParty: "me", counterparty: "someone_else", amount: 100 },
-] as Transaction[];
-
 const TransactionManager = () => {
-  const [transactions, setTransactions] = useState<Transaction[]>(TRANSACTIONS);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [showTransactionDialog, setShowTransactionDialog] = useState<boolean>(
     false
   );
 
+  useEffect(() => {
+    fetch("/api/transactions")
+      .then((res) => res.json())
+      .then((transactionsFromAPI) =>
+        setTransactions(transactionsFromAPI as Transaction[])
+      );
+  }, []);
+
   const onAdd = (transaction: Transaction) => {
-    setTransactions([...transactions, transaction]);
+    fetch("/api/transactions", {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify(transaction),
+    })
+      .then((res) => res.json())
+      .then((transactionFromAPI) =>
+        setTransactions([...transactions, transactionFromAPI as Transaction])
+      );
     setShowTransactionDialog(false);
   };
 
   const onClose = () => {
     setShowTransactionDialog(false);
+  };
+
+  const handleCompress = () => {
+    fetch("api/transactions/compressed")
+      .then((res) => res.blob())
+      .then((blob) => {
+        const file = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = file;
+        a.setAttribute("download", "compressedTransactions.csv");
+        a.click();
+      });
   };
 
   return (
@@ -69,7 +93,11 @@ const TransactionManager = () => {
             </Button>
           </Grid>
           <Grid item xs={3}>
-            <Button variant="contained" color="primary">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleCompress}
+            >
               Compress Transactions
             </Button>
           </Grid>
