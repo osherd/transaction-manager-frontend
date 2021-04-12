@@ -10,21 +10,25 @@ const TransactionManager = () => {
   );
 
   useEffect(() => {
-    fetch("/api/transactions")
-      .then((res) => res.json())
-      .then((transactionsFromAPI) =>
-        setTransactions(transactionsFromAPI as Transaction[])
-      );
+    const fetchTransactionsData = async () => {
+      const response = await fetch("/api/transactions");
+      const transactionsFromAPI = await response.json();
+      setTransactions(transactionsFromAPI as Transaction[]);
+    }
+    fetchTransactionsData()
   }, []);
 
+
   const onAdd = (transaction: Transaction) => {
-    fetch("/api/transactions", {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-      body: JSON.stringify(transaction),
-    })
+
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(transaction)
+    }
+
+
+    fetch("/api/transactions", requestOptions)
       .then((res) => res.json())
       .then((transactionFromAPI) =>
         setTransactions([...transactions, transactionFromAPI as Transaction])
